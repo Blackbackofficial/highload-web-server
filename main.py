@@ -1,6 +1,4 @@
-def server():
-    print("start server")
-
+import server.server as ser
 
 if __name__ == '__main__':
-    server()
+    ser.server()
