@@ -4,35 +4,6 @@ import os
 import re
 import urllib.parse
 
-MIME_TYPES = {
-    'html': 'text/html',
-    'css': 'text/css',
-    'js': 'text/javascript',
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'png': 'image/png',
-    'gif': 'image/gif',
-    'swf': 'application/x-shockwave-flash',
-    'txt': 'text/txt',
-    'default': 'text/plain'
-}
-
-RESPONSE_CODES = {
-    'OK': '200 OK',
-    'NOT_FOUND': '404 Not Found',
-    'NOT_ALLOWED': '405 Method Not Allowed',
-    'FORBIDDEN': '403 Forbidden'
-}
-
-ALLOW_METHODS = ['HEAD', 'GET']
-
-RESPONSE_OK = 'HTTP/{} {}\r\n', 'Content-Type: {}\r\n', 'Content-Length: {}\r\n', 'Date: {}\r\n', \
-              'Server: PythonServer\r\n\r\n'
-
-RESPONSE_FAIL = 'HTTP/{} {}\r\n', 'Server: PythonServer'
-
-DATETIME_TEMPLATE = '%a, %d %b %Y %H:%M:%S GMT'
-
 
 class HTTP_request:
     def __init__(self):
@@ -41,6 +12,27 @@ class HTTP_request:
         self.url = None
         self.headers = None
         self.query = None
+
+
+MIME_TYPES = {
+    'html': 'text/html', 'css': 'text/css', 'js': 'text/javascript', 'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'swf': 'application/x-shockwave-flash',
+    'txt': 'text/txt', 'default': 'text/plain'
+}
+
+RESPONSE_CODES = {
+    'OK': '200 OK', 'NOT_FOUND': '404 Not Found',
+    'NOT_ALLOWED': '405 Method Not Allowed', 'FORBIDDEN': '403 Forbidden'
+}
+
+RESPONSE_OK = 'HTTP/{} {}\r\n' 'Content-Type: {}\r\n' 'Content-Length: {}\r\n' 'Date: {}\r\n' \
+              'Server: PythonServer\r\n\r\n'
+
+RESPONSE_FAIL = 'HTTP/{} {}\r\n' 'Server: PythonServer'
+
+DATETIME_TEMPLATE = '%a, %d %b %Y %H:%M:%S GMT'
+
+ALLOW_METHODS = ['HEAD', 'GET']
 
 
 def build_response(resp_code='', protocol='', content_type='', content_length=''):
@@ -75,14 +67,12 @@ def parse_request(request_string):
 def request_processing(request_string, document_root=''):
     request = parse_request(request_string)
     protocol = request.protocol
-    response = None
-    file_path = None
 
     if request.method not in ALLOW_METHODS:
         return build_response(RESPONSE_CODES["NOT_ALLOWED"], protocol), None
 
-    # Много поднимаемся наверх по папкам
-    if len(re.findall(r'server/', request.url)) > 1:
+    # Up the folders
+    if len(re.findall(r'\.\./', request.url)) > 1:
         return build_response(RESPONSE_CODES["FORBIDDEN"], protocol), None
 
     request.url += 'index.html' if request.url[-1] == '/' else ''

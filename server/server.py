@@ -8,25 +8,21 @@ from server.delivery import request_processing
 
 def server():
     config = configparser.ConfigParser()
-
     if Path("/etc/httpd.conf").is_file():
         config.read_file(open(r'/etc/httpd.conf'))
     else:
         config.read_file(open(r'httpd.conf'))
 
     try:
-        PORT = int(config.get('server-config', 'listen'))
-        CPU_LIMIT = int(config.get('server-config', 'cpu_limit'))
-        DOCUMENT_ROOT = config.get('server-config', 'document_root')
+        PORT = int(config.get('config', 'listen'))
+        CPU_LIMIT = int(config.get('config', 'cpu_limit'))
+        DOCUMENT_ROOT = config.get('config', 'document_root')
     except:
         PORT = 80
         DOCUMENT_ROOT = '/var/www/html'
         CPU_LIMIT = 4
 
     print("Starting server on port {}, document root: {}".format(PORT, DOCUMENT_ROOT))
-
-    EOL1 = b'\n\n'
-    EOL2 = b'\n\r\n'
 
     serverSoc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     serverSoc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -44,14 +40,11 @@ def server():
     epoll.register(serverSoc.fileno(), select.EPOLLIN | select.EPOLLET)
 
     try:
-        # print ("Start thread")
         connections = {}
         requests = {}
         responses = {}
-
         while True:
             events = epoll.poll(1)
-
             for fileno, event in events:
                 if fileno == serverSoc.fileno():
 
@@ -68,8 +61,6 @@ def server():
                 elif event & select.EPOLLIN:
                     try:
                         while True:
-                            # print ("Getting data ...", select.EPOLLIN)
-                            # buffer = b""
                             buffer = connections[fileno].recv(1024)
                             if not buffer:
                                 break
@@ -77,15 +68,13 @@ def server():
                     except socket.error:
                         pass
 
-                    if EOL1 in requests[fileno] or EOL2 in requests[fileno]:
+                    if b'\n\n' in requests[fileno] or b'\n\r\n' in requests[fileno]:
                         epoll.modify(fileno, select.EPOLLOUT | select.EPOLLET)
-                    # print('-'*40 + '\n' + requests[fileno].decode('UTF-8')[:-2])
                     resp, file = request_processing(requests[fileno].decode(), DOCUMENT_ROOT)  # 'UTF-8'
                     buff = b""
                     file_content = b""
                     if file:
                         while True:
-                            # print ("Getting file...")
                             file_content += buff
                             buff = os.read(file, 1024)
                             if not buff:
