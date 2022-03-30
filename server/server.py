@@ -3,7 +3,7 @@ import os
 import socket
 import select
 from pathlib import Path
-from delivery import request_processing
+from server.delivery import request_processing
 
 
 def server():
