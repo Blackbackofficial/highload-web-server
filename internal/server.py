@@ -40,10 +40,10 @@ def server():
     epoll.register(serverSoc.fileno(), select.EPOLLIN | select.EPOLLET)
 
     try:
+        connections = {}
+        requests = {}
+        responses = {}
         while True:
-            connections = {}
-            requests = {}
-            responses = {}
             connList = epoll.poll()
             for fileno, event in connList:
                 if fileno == serverSoc.fileno():
