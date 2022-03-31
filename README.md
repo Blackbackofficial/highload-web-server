@@ -35,7 +35,7 @@ docker build -t blackbackofficial .
 git clone https://github.com/init/http-test-suite.git
 cd http-test-suite
 
- docker run -p 80:80 -v /absolute/path/to/httpd.conf:/etc/httpd.conf:ro -v /absolute/path/to/http-test-suite:/var/www/html:ro -t blackbackofficial
+docker run -p 80:80 -v /absolute/path/to/httpd.conf:/etc/httpd.conf:ro -v /absolute/path/to/http-test-suite:/var/www/html:ro -t blackbackofficial
 
 ./httptest.py
 ```
