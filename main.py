@@ -1,4 +1,4 @@
-import server.server as ser
+import internal.server as server
 
 if __name__ == '__main__':
-    ser.server()
+    server.server()
